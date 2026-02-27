@@ -1,0 +1,54 @@
+# ============================================================
+# docker-compose.yml — локальна інфраструктура user-service
+#
+# ВАЖЛИВО: Kafka, Zookeeper, Kafka-UI вже запущені в auth-service!
+# user-service НЕ дублює їх — просто підключається до тієї ж мережі.
+#
+# Порядок запуску:
+#   1. cd auth-service && docker-compose up -d   (запускає Kafka + auth-postgres)
+#   2. cd user-service && docker-compose up -d   (запускає тільки user-postgres)
+# ============================================================
+
+services:
+
+  # ============================================================
+  # PostgreSQL — власна БД user-service (Database per Service pattern)
+  # Порт 5434 щоб не конфліктувати з auth-service (5433)
+  # Credentials: postgres/postgres — відповідають .env
+  # ============================================================
+  user-postgres:
+    image: postgres:15-alpine
+    container_name: user-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - user_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d userdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auth-network  # та сама мережа що auth-service
+
+volumes:
+  user_postgres_data:
+
+# ============================================================
+# МЕРЕЖА: auth-network — створена auth-service docker-compose.
+# external: true → Docker не намагається створити нову,
+# а використовує вже існуючу.
+#
+# Завдяки цій мережі user-service (локально) може звертатись до:
+#   kafka:29092     — Kafka broker
+#   zookeeper:2181  — Zookeeper
+#   auth-postgres:5432 — (якщо колись знадобиться, хоча не рекомендовано)
+# ============================================================
+networks:
+  auth-network:
+    external: true
