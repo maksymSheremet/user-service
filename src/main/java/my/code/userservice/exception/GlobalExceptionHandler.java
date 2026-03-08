@@ -17,17 +17,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final String TIMESTAMP_PROPERTY = "timestamp";
 
     @ExceptionHandler(UserNotFoundException.class)
     public ProblemDetail handleUserNotFound(UserNotFoundException ex) {
         log.warn("User not found: {}", ex.getMessage());
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.NOT_FOUND,
-                ex.getMessage()
-        );
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         problem.setType(URI.create("/errors/user-not-found"));
         problem.setTitle("User Not Found");
-        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         return problem;
     }
 
@@ -39,19 +37,17 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.toMap(
                         FieldError::getField,
                         fe -> fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Invalid value",
-                        (first, second) -> first
+                        (first, _) -> first
                 ));
 
         log.warn("Validation failed: {}", errors);
 
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
-                "Request validation failed"
-        );
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
+                "Request validation failed");
         problem.setType(URI.create("/errors/validation-failed"));
         problem.setTitle("Validation Failed");
         problem.setProperty("errors", errors);
-        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         return problem;
     }
 
@@ -59,13 +55,10 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
 
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.FORBIDDEN,
-                "Access denied"
-        );
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
         problem.setType(URI.create("/errors/access-denied"));
         problem.setTitle("Access Denied");
-        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         return problem;
     }
 
@@ -73,13 +66,11 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleGenericException(Exception ex) {
         log.error("Unexpected error occurred", ex);
 
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred. Please try again later."
-        );
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
+                "An unexpected error occurred. Please try again later.");
         problem.setType(URI.create("/errors/internal-error"));
         problem.setTitle("Internal Server Error");
-        problem.setProperty("timestamp", Instant.now());
+        problem.setProperty(TIMESTAMP_PROPERTY, Instant.now());
         return problem;
     }
 }

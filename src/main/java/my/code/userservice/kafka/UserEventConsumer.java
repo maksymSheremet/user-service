@@ -17,16 +17,23 @@ public class UserEventConsumer {
     private final UserService userService;
 
     @KafkaListener(
-            topics = "user-registered-events",
+            topics = "${kafka.topic.user-registered}",
             groupId = "user-service-group",
             containerFactory = "kafkaListenerContainerFactory"
     )
-    public void handleUserRegistered(ConsumerRecord<String, UserRegisteredEvent> record,
+    public void handleUserRegistered(ConsumerRecord<String, UserRegisteredEvent> consumerRecord,
                                      Acknowledgment acknowledgment) {
-        UserRegisteredEvent event = record.value();
+        UserRegisteredEvent event = consumerRecord.value();
+
+        if (event == null) {
+            log.warn("Received null event for key={}, partition={}, offset={} — skipping",
+                    consumerRecord.key(), consumerRecord.partition(), consumerRecord.offset());
+            acknowledgment.acknowledge();
+            return;
+        }
 
         log.info("Received USER_REGISTERED: userId={}, email={}, partition={}, offset={}",
-                event.userId(), event.email(), record.partition(), record.offset());
+                event.userId(), event.email(), consumerRecord.partition(), consumerRecord.offset());
 
         userService.createProfileFromEvent(event);
 

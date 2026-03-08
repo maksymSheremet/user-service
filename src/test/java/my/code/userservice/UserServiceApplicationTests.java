@@ -1,13 +1,18 @@
-//package my.code.userservice;
-//
-//import org.junit.jupiter.api.Test;
-//import org.springframework.boot.test.context.SpringBootTest;
-//
-//@SpringBootTest
-//class UserServiceApplicationTests {
-//
-//    @Test
-//    void contextLoads() {
-//    }
-//
-//}
+package my.code.userservice;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+class UserServiceApplicationTests extends BaseIntegrationTest {
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Test
+    void contextLoads() {
+        assertNotNull(applicationContext, "ApplicationContext should not be null");
+    }
+}

@@ -63,9 +63,6 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.createdAt = Instant.now();
-        if (this.timezone == null) this.timezone = "UTC";
-        if (this.language == null) this.language = "en";
-        if (this.status == null) this.status = UserStatus.ACTIVE;
     }
 
     @PreUpdate

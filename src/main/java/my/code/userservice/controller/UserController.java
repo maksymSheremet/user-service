@@ -34,10 +34,8 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<UserProfileResponse> updateMyProfile(
-            Authentication authentication,
-            @Valid @RequestBody UpdateProfileRequest request
-    ) {
+    public ResponseEntity<UserProfileResponse> updateMyProfile(Authentication authentication,
+                                                               @Valid @RequestBody UpdateProfileRequest request) {
         Long userId = extractUserId(authentication);
         log.debug("PUT /api/me: userId={}", userId);
 
@@ -46,10 +44,8 @@ public class UserController {
     }
 
     @PostMapping("/onboarding")
-    public ResponseEntity<UserProfileResponse> completeOnboarding(
-            Authentication authentication,
-            @Valid @RequestBody CompleteOnboardingRequest request
-    ) {
+    public ResponseEntity<UserProfileResponse> completeOnboarding(Authentication authentication,
+                                                                  @Valid @RequestBody CompleteOnboardingRequest request) {
         Long userId = extractUserId(authentication);
         log.debug("POST /api/me/onboarding: userId={}", userId);
 
