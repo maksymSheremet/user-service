@@ -1,0 +1,43 @@
+# ============================================================
+# application-test.yml — test профіль для integration тестів
+# Активується через @ActiveProfiles("test") в BaseIntegrationTest
+# ============================================================
+
+spring:
+  # Flyway — дозволяємо baseline для чистої тестової БД
+  flyway:
+    baseline-on-migrate: true
+
+  # JPA — показуємо SQL в тестах для дебагу
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Kafka consumer — окрема group для тестів
+  # Важливо: якщо тести запускаються паралельно — не конфліктують
+  kafka:
+    consumer:
+      group-id: user-service-test-group
+      auto-offset-reset: earliest
+
+  # Вимикаємо Eureka в тестах — немає registry сервера
+  cloud:
+    discovery:
+      enabled: false
+
+# JWT — тестовий секрет (достатньо довгий для HMAC-SHA256)
+jwt:
+  secret: test-secret-key-that-is-long-enough-for-hmac-sha256-algorithm
+
+# Internal API Key — тестовий ключ
+internal:
+  api:
+    key: test-internal-api-key
+
+logging:
+  level:
+    my.code.userservice: DEBUG
+    org.springframework.kafka: DEBUG
+    org.testcontainers: INFO

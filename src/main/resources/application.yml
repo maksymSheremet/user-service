@@ -1,27 +1,88 @@
+# ============================================================
+# application.yml — базова конфігурація user-service
+# ============================================================
 server:
   port: 8081
 
 spring:
   application:
     name: user-service
+
+# ==================== DataSource ====================
   datasource:
-    url: ${DATA_URL}
-    username: ${DATA_USER}
-    password: ${DATA_PASSWORD}
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/userdb}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+
+# ==================== JPA ====================
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         format_sql: false
+        jdbc:
+          time_zone: UTC
 
+# ==================== Flyway ====================
   flyway:
     enabled: true
     baseline-on-migrate: false
     locations: classpath:db/migration
 
+# ==================== Kafka ====================
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: user-service-group
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: MANUAL_IMMEDIATE
+
+# ==================== Spring Cloud ====================
+  cloud:
+    discovery:
+      enabled: false
+
+# ==================== JWT ====================
+jwt:
+  secret: ${JWT_SECRET_KEY}
+
+# ==================== Internal API ====================
+internal:
+  api:
+    key: ${INTERNAL_API_KEY}
+
+# ==================== Kafka Topics ====================
+kafka:
+  topic:
+    user-registered: user-registered-events
+    user-registered-dlq: user-registered-events-dlt
+
+# ==================== Logging ====================
 logging:
   level:
     root: INFO
-    my.code.auth: INFO
+    my.code.userservice: INFO
+    org.springframework.kafka: INFO
+
+# ==================== Actuator ====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
