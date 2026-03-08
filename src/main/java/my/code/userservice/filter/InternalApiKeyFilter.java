@@ -21,16 +21,16 @@ import java.io.IOException;
 public class InternalApiKeyFilter extends OncePerRequestFilter {
 
     static final String API_KEY_HEADER = "X-Internal-Api-Key";
-    private static final String INTERNAL_PATH_PREFIX = "/api/internal/";
 
     private final InternalApiProperties internalApiProperties;
+
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        if (!request.getRequestURI().startsWith(INTERNAL_PATH_PREFIX)) {
+        if (!request.getRequestURI().startsWith(internalApiProperties.getPathPrefix())) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -14,16 +14,16 @@ import java.nio.charset.StandardCharsets;
 public class DlqEventConsumer {
 
     @KafkaListener(
-            topics = "user-registered-events.DLT",
+            topics = "${kafka.topic.user-registered-dlq}",
             groupId = "user-service-dlq-group",
             containerFactory = "kafkaListenerContainerFactory"
     )
-    public void handleDeadLetter(ConsumerRecord<String, Object> record, Acknowledgment acknowledgment) {
-        String originalTopic = getHeader(record, "kafka_dlt-original-topic");
-        String originalPartition = getHeader(record, "kafka_dlt-original-partition");
-        String originalOffset = getHeader(record, "kafka_dlt-original-offset");
-        String exceptionMessage = getHeader(record, "kafka_dlt-exception-message");
-        String exceptionClass = getHeader(record, "kafka_dlt-exception-fqcn");
+    public void handleDeadLetter(ConsumerRecord<String, Object> consumerRecord, Acknowledgment acknowledgment) {
+        String originalTopic = getHeader(consumerRecord, "kafka_dlt-original-topic");
+        String originalPartition = getHeader(consumerRecord, "kafka_dlt-original-partition");
+        String originalOffset = getHeader(consumerRecord, "kafka_dlt-original-offset");
+        String exceptionMessage = getHeader(consumerRecord, "kafka_dlt-exception-message");
+        String exceptionClass = getHeader(consumerRecord, "kafka_dlt-exception-fqcn");
 
         log.error("""
                         Dead letter received:
@@ -39,18 +39,18 @@ public class DlqEventConsumer {
                 originalTopic,
                 originalPartition,
                 originalOffset,
-                record.partition(),
-                record.offset(),
+                consumerRecord.partition(),
+                consumerRecord.offset(),
                 exceptionClass,
                 exceptionMessage,
-                record.value()
+                consumerRecord.value()
         );
 
         acknowledgment.acknowledge();
     }
 
-    private String getHeader(ConsumerRecord<?, ?> record, String headerName) {
-        Header header = record.headers().lastHeader(headerName);
+    private String getHeader(ConsumerRecord<?, ?> consumerRecord, String headerName) {
+        Header header = consumerRecord.headers().lastHeader(headerName);
         if (header == null) return "N/A";
         return new String(header.value(), StandardCharsets.UTF_8);
     }

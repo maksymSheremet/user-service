@@ -8,6 +8,7 @@ spring:
   application:
     name: user-service
 
+# ==================== DataSource ====================
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5434/userdb}
     username: ${DB_USERNAME:postgres}
@@ -17,6 +18,7 @@ spring:
       minimum-idle: 5
       connection-timeout: 30000
 
+# ==================== JPA ====================
   jpa:
     hibernate:
       ddl-auto: validate
@@ -28,53 +30,49 @@ spring:
         jdbc:
           time_zone: UTC
 
+# ==================== Flyway ====================
   flyway:
     enabled: true
     baseline-on-migrate: false
-    locations: classpath:db/migration  # ← ВИПРАВЛЕНО: було 'migratio'
+    locations: classpath:db/migration
 
+# ==================== Kafka ====================
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: user-service-group
       auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: "my.code.userservice.dto.event,my.code.auth.event"
-        spring.json.use.type.headers: false
-        spring.json.value.default.type: my.code.userservice.dto.event.UserRegisteredEvent
     listener:
       ack-mode: MANUAL_IMMEDIATE
 
+# ==================== Spring Cloud ====================
   cloud:
     discovery:
       enabled: false
 
-# ============================================================
-# JWT — той самий secret що в auth-service
-# auth-service JwtProperties: prefix="jwt", поле secret → jwt.secret
-# user-service JwtProperties: prefix="jwt", поле secret → jwt.secret
-# Однаковий ключ = можемо валідувати токени що auth-service видав
-# ============================================================
+# ==================== JWT ====================
 jwt:
   secret: ${JWT_SECRET_KEY}
 
+# ==================== Internal API ====================
 internal:
   api:
     key: ${INTERNAL_API_KEY}
 
+# ==================== Kafka Topics ====================
 kafka:
   topic:
     user-registered: user-registered-events
-    user-registered-dlq: user-registered-events.DLT
+    user-registered-dlq: user-registered-events-dlt
 
+# ==================== Logging ====================
 logging:
   level:
     root: INFO
     my.code.userservice: INFO
     org.springframework.kafka: INFO
 
+# ==================== Actuator ====================
 management:
   endpoints:
     web:

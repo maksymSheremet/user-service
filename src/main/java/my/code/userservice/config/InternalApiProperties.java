@@ -16,4 +16,7 @@ public class InternalApiProperties {
 
     @NotBlank(message = "Internal API key must not be blank")
     private String key;
+
+    @NotBlank(message = "Internal API path prefix must not be blank")
+    private String pathPrefix = "/api/internal/";
 }

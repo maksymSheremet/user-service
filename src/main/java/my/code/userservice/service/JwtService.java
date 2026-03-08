@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class JwtService {
 
+    private static final String DEFAULT_ROLE = "USER";
+
     private final JwtProperties jwtProperties;
 
     public Long extractUserId(String token) {
@@ -40,6 +42,18 @@ public class JwtService {
         }
     }
 
+    public String extractRole(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            String role = claims.get("role", String.class);
+            return role != null ? role : DEFAULT_ROLE;
+        } catch (Exception ex) {
+            log.debug("Failed to extract role, using default: {}", ex.getMessage());
+            return DEFAULT_ROLE;
+        }
+    }
+
+
     private Claims parseClaims(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -49,8 +63,6 @@ public class JwtService {
     }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(
-                jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)
-        );
+        return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8));
     }
 }

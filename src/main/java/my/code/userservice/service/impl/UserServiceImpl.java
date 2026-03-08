@@ -39,20 +39,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserProfileResponse updateProfile(Long userId, UpdateProfileRequest request) {
         User user = findById(userId);
-
-        if (request.fullName() != null) {
-            user.setFullName(request.fullName());
-        }
-        if (request.avatarUrl() != null) {
-            user.setAvatarUrl(request.avatarUrl());
-        }
-        if (request.timezone() != null) {
-            user.setTimezone(request.timezone());
-        }
-        if (request.language() != null) {
-            user.setLanguage(request.language());
-        }
-
+        userMapper.updateFromRequest(request, user);
         User saved = userRepository.save(user);
         log.debug("Profile updated: userId={}", userId);
         return userMapper.toResponse(saved);
@@ -70,7 +57,9 @@ public class UserServiceImpl implements UserService {
 
         user.setTimezone(request.timezone());
         user.setLanguage(request.language());
-        if (request.fullName() != null) user.setFullName(request.fullName());
+        if (request.fullName() != null) {
+            user.setFullName(request.fullName());
+        }
         user.setOnboardingCompleted(true);
 
         User saved = userRepository.save(user);
