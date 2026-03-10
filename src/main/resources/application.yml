@@ -52,7 +52,7 @@ spring:
 
 # ==================== JWT ====================
 jwt:
-  secret: ${JWT_SECRET_KEY}
+  secret: ${YOUR_JWT_SECRET_KEY}
 
 # ==================== Internal API ====================
 internal:
